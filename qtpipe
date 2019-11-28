@@ -1,0 +1,26 @@
+In other words, the command1 | command2 shell command command can be achieved in the following way:
+
+QProcess process1;
+QProcess process2;
+
+process1.setStandardOutputProcess(&process2);
+
+process1.start("cat file");
+process2.start("grep string");
+process2.setProcessChannelMode(QProcess::ForwardedChannels);
+
+// Wait for it to start
+if(!process1.waitForStarted())
+    return 0;
+
+bool retval = false;
+QByteArray buffer;
+while ((retval = process2.waitForFinished()));
+    buffer.append(process2.readAll());
+
+if (!retval) {
+    qDebug() << "Process 2 error:" << process2.errorString();
+    return 1;
+}
+
+qDebug() << "Buffer data" << buffer;
